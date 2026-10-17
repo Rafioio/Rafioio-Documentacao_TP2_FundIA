@@ -1,7 +1,8 @@
 Documentção do TP 2
 
-como compilar:
+código: https://github.com/Lucas-Szuster/FUNDIA-TP2
 
+como compilar:
 xelatex "main.tex"
 
 
