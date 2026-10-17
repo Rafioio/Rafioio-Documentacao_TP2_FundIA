@@ -1,0 +1,47 @@
+%======================================================================
+\section{Protocolo Experimental}\label{sec:protocolo}
+%======================================================================
+
+\subsection{Orçamento e execuções}
+
+Todos os algoritmos gastam o mesmo recurso: o número de avaliações de $h$. Cada sucessor examinado pela busca local conta 1, e cada indivíduo avaliado pelo GA conta 1. Os algoritmos param exatamente ao atingir o orçamento (Tabela~\ref{tab:orcamento}).
+
+\begin{table}[H]
+\centering
+\caption{Orçamento e execuções independentes.}
+\label{tab:orcamento}
+\small
+\begin{tabular}{lrr}
+\toprule
+Instância & Orçamento $B$ & Execuções\\
+\midrule
+pequena ($n=12$) & 50\,000 & 30\\
+intermediária ($n=50$) & 150\,000 & 30\\
+grande ($n=150$) & 300\,000 & 10\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Métricas e estatística}
+
+Para cada combinação algoritmo $\times$ instância, registra-se o melhor $h$ de cada execução e calculam-se média, desvio-padrão, mínimo e mediana. O gap relativo ao ótimo na instância pequena é $\text{gap}=(h-h^\star)/h^\star$, com $h^\star=1875$. Registram-se também o tempo de parede por execução e o número de avaliações.
+
+As comparações par a par usam o teste não paramétrico de Mann--Whitney \cite{mann1947}, bilateral, com nível de significância $\alpha_s=0{,}05$. Como são três comparações por instância, sugere-se correção de Holm.
+
+\pend{teste e correção para múltiplas comparações efetivamente usados e a biblioteca empregada}
+
+Médias próximas com dispersões grandes não sustentam conclusão; as afirmações de superioridade no texto vêm acompanhadas do $p$-valor.
+
+\subsection{Curvas de convergência}
+
+Para cada instância, registra-se o melhor $h$ encontrado em função do número de avaliações gastas, em uma grade fixa de pontos, e plota-se a mediana das execuções por algoritmo. Para o GA, acrescenta-se a curva da média da população; a distância entre as duas curvas indica a perda de diversidade.
+
+\subsection{Ambiente de execução}
+
+\pend{descrição do hardware (CPU, memória), sistema operacional e versões do interpretador/compilador usados nas medições de tempo}
+
+\subsection{Reprodutibilidade}
+
+O código acompanha um \texttt{README} com os comandos exatos para reproduzir cada tabela e figura. Os resultados brutos de todas as execuções são gravados em arquivos \texttt{.csv}.
+
+\pend{endereço do repositório ou nome do arquivo .zip e os comandos do README para cada tabela e figura (ver Anexo A)}

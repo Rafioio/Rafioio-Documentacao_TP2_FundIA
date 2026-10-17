@@ -1,0 +1,95 @@
+\documentclass[10pt,twocolumn,a4paper]{article}
+\usepackage[top=2cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage[portuguese, provide=*]{babel}
+\usepackage{enumitem}
+\setlist[itemize]{label=-}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% Configuração para blocos de código
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Python
+}
+\lstset{style=mystyle}
+
+% --- Marcadores de pendência ---
+\newcommand{\pend}[1]{\textbf{\textcolor{red}{[PREENCHER: #1]}}}
+\newcommand{\pp}{\textbf{\textcolor{red}{[PREENCHER]}}}
+\newcommand{\figpend}[2]{%
+  \fbox{\parbox[c][#1][c]{0.94\columnwidth}{\centering\textcolor{red}{\textbf{[FIGURA PENDENTE]}}\\ \footnotesize #2}}}
+
+\title{\vspace{-1.5cm}\textbf{Busca Local e Algoritmo Genético para o Sequenciamento de Manutenção de Ativos: uma Análise Comparativa}}
+\author{
+    \textbf{Rafael Campello Soares, Arthur Rafael Silva Teixeira}\\
+    \textbf{Roberto Júnior Cassimiro Campolina, Lucas Araújo Campos Szuster}\\
+    \textit{Universidade Federal de Minas Gerais (UFMG) -- Departamento de Engenharia Elétrica}\\
+    \textit{Disciplina: Fundamentos de Inteligência Artificial -- Trabalho Prático 2}\\
+    \textit{Belo Horizonte, MG, Brasil}
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+% Inclusion das seções separadas
+\input{secoes/00_resumo}
+\input{secoes/01_introducao}
+\input{secoes/02_modelagem}
+\input{secoes/03_algoritmos}
+\input{secoes/04_protocolo}
+\input{secoes/05_resultados}
+\input{secoes/06_conclusoes}
+
+% Bibliografia
+\begin{thebibliography}{9}
+
+\bibitem{poole2023}
+D.~Poole and A.~Mackworth, \textit{Artificial Intelligence: Foundations of Computational Agents}, 3rd~ed. Cambridge University Press, 2023. Cap.~4.
+
+\bibitem{eiben2003}
+A.~E. Eiben and J.~E. Smith, \textit{Introduction to Evolutionary Computing}. Springer-Verlag, 2003.
+
+\bibitem{gaspar2013}
+A.~Gaspar-Cunha, R.~H.~C. Takahashi, and C.~H. Antunes (Orgs.), \textit{Manual de Computação Evolutiva e Metaheurística}. Editora UFMG, 2013.
+
+\bibitem{russell2016}
+S.~Russell and P.~Norvig, \textit{Artificial Intelligence: A Modern Approach}, 3rd~ed. Pearson, 2016. Cap.~4.
+
+\bibitem{mann1947}
+H.~B. Mann and D.~R. Whitney, ``On a test of whether one of two random variables is stochastically larger than the other,'' \textit{Annals of Mathematical Statistics}, vol.~18, no.~1, pp.~50--60, 1947.
+
+\end{thebibliography}
+
+\input{secoes/07_apendice}
+
+\end{document}

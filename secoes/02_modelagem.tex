@@ -1,0 +1,87 @@
+%======================================================================
+\section{Modelagem do Problema}\label{sec:modelagem}
+%======================================================================
+
+\subsection{Dados da instância}
+
+Seja $\mathcal{A}=\{1,\dots,n\}$ o conjunto de ativos e $0$ o índice da base. Para cada ativo $j\in\mathcal{A}$ são dados a posição $(x_j,y_j)$, a duração do serviço $p_j$ (horas), o prazo $d_j$ (hora-limite de conclusão) e o peso de criticidade $w_j$ (custo por hora de atraso). A base tem posição $(x_0,y_0)$ e $p_0=0$. O tempo de deslocamento entre dois pontos $i$ e $j$ é
+\begin{equation}
+  t_{ij}=\operatorname{round}\!\left(\sqrt{(x_i-x_j)^2+(y_i-y_j)^2}\right),
+  \label{eq:tij}
+\end{equation}
+com arredondamento para o inteiro mais próximo. Esse arredondamento é necessário para que os valores de $h$ sejam comparáveis entre grupos. A equipe não retorna à base ao final.
+
+\subsection{Espaço de estados, ações e função objetivo}
+
+\begin{itemize}
+  \item \textbf{Estado (solução candidata):} uma permutação $\pi=(\pi_1,\dots,\pi_n)$ de $\mathcal{A}$, que representa a ordem de visita. O espaço de busca é $\mathcal{S}=S_n$, com $|\mathcal{S}|=n!$.
+  \item \textbf{Ações:} os movimentos definidos pelos operadores de vizinhança (Seção~\ref{sec:vizinhancas}). Cada movimento transforma uma permutação em outra.
+  \item \textbf{Restrições:} não há restrições rígidas, pois toda permutação é viável. Os prazos $d_j$ são restrições brandas (\textit{soft constraints}), penalizadas na função objetivo. O problema é de otimização, e não de satisfação.
+  \item \textbf{Instante de conclusão:} com $\pi_0=0$ e $C_{\pi_0}=0$,
+  \begin{equation}
+    C_{\pi_k}=C_{\pi_{k-1}}+t_{\pi_{k-1}\pi_k}+p_{\pi_k}.
+    \label{eq:conclusao}
+  \end{equation}
+  \item \textbf{Função objetivo (\textit{fitness}), a minimizar:} o atraso ponderado total
+  \begin{equation}
+    h(\pi)=\sum_{j=1}^{n} w_j\cdot\max(0,\,C_j-d_j).
+    \label{eq:h}
+  \end{equation}
+  \item \textbf{Problema:} $\pi^\star=\arg\min_{\pi\in S_n}h(\pi)$.
+\end{itemize}
+
+Na terminologia do algoritmo genético, o \textbf{cromossomo} é a permutação completa, o \textbf{gene} é uma posição da sequência, o \textbf{alelo} é o ativo que a ocupa e a \textbf{aptidão} é $h(\pi)$. Como $h$ mede custo, o GA busca o cromossomo de menor aptidão.
+
+\subsection{Propriedades úteis}
+
+O custo acumulado $h$ é não decrescente ao longo do prefixo da permutação: acrescentar o $(k{+}1)$-ésimo ativo nunca reduz o atraso já acumulado pelos $k$ primeiros. Além disso, o instante $C_{\pi_k}$ depende apenas do prefixo $(\pi_1,\dots,\pi_k)$, o que permite avaliar um movimento recalculando somente o sufixo afetado (Seção~\ref{sec:incremental}).
+
+\subsection{Instâncias}
+
+Os arquivos \texttt{manutencao\_*.txt} contêm $n$, as coordenadas da base e, para cada ativo, $(x_j,y_j,p_j,d_j,w_j)$. A Tabela~\ref{tab:instancias} resume as instâncias e os valores de referência fornecidos no enunciado. O valor da instância pequena é o ótimo global, obtido por busca exata. Os demais são os melhores valores conhecidos, obtidos pelos professores com orçamento muito maior, e servem como alvo, não como meta obrigatória.
+
+\begin{table}[H]
+\centering
+\caption{Instâncias e valores de referência de $h$.}
+\label{tab:instancias}
+\small
+\begin{tabular}{lrrrl}
+\toprule
+Instância & $n$ & $\sum_j p_j$ & Ref. $h$ & Natureza\\
+\midrule
+pequena & 12 & 55 & 1\,875 & ótimo global\\
+intermediária & 50 & 239 & 16\,332 & melhor conhecido\\
+grande & 150 & 684 & 60\,417 & melhor conhecido\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Operadores de vizinhança}\label{sec:vizinhancas}
+
+Os três operadores clássicos geram sucessores de uma permutação (Figura do enunciado, exemplo com $\pi=(3,7,1,5,2,8)$):
+
+\begin{itemize}
+  \item \textbf{Swap (troca):} troca os ativos nas posições $i<j$. Há $\binom{n}{2}=\frac{n(n-1)}{2}$ sucessores.
+  \item \textbf{Insertion (realocação):} remove o ativo da posição $i$ e o reinsere na posição $j\neq i$. Há $n(n-1)$ movimentos, mas a realocação entre posições adjacentes coincide com um \textit{swap} adjacente e é contada duas vezes; o número de sucessores distintos é $(n-1)^2$.
+  \item \textbf{2-opt (inversão):} inverte o segmento entre as posições $i<j$. Há $\frac{n(n-1)}{2}$ sucessores, e a inversão de um segmento de tamanho 2 coincide com um \textit{swap} adjacente.
+\end{itemize}
+
+A Tabela~\ref{tab:vizinhanca} apresenta o tamanho de cada vizinhança nas três instâncias. Os operadores não são equivalentes: cada um induz um conjunto distinto de sucessores e, portanto, uma superfície adaptativa diferente para o mesmo problema.
+
+\begin{table}[H]
+\centering
+\caption{Tamanho da vizinhança induzida em função de $n$.}
+\label{tab:vizinhanca}
+\small
+\begin{tabular}{lcrrr}
+\toprule
+Operador & Fórmula & $n=12$ & $n=50$ & $n=150$\\
+\midrule
+Swap & $n(n-1)/2$ & 66 & 1\,225 & 11\,175\\
+Insertion & $(n-1)^2$ & 121 & 2\,401 & 22\,201\\
+2-opt & $n(n-1)/2$ & 66 & 1\,225 & 11\,175\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Na instância grande, uma varredura completa da vizinhança de \textit{swap} consome 11\,175 avaliações, cerca de 3{,}7\% do orçamento de 300\,000. Esse custo condiciona o comportamento das variantes de seleção do sucessor (Seção~\ref{sec:greedy}).

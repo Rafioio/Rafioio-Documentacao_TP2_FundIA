@@ -1,0 +1,212 @@
+%======================================================================
+\section{Resultados e Análise}\label{sec:resultados}
+%======================================================================
+
+\subsection{T1: validação da função de avaliação}
+
+A função $h$ foi validada com os dois valores do enunciado para \texttt{manutencao\_pequena.txt}: a permutação identidade $\pi=(1,\dots,12)$ deve resultar em $h(\pi)=4366$, e o ótimo global conhecido é $h^\star=1875$. Uma heurística gulosa razoável (menor acréscimo imediato de atraso) alcança 3168, cerca de 69\% acima do ótimo.
+
+\begin{table}[H]
+\centering
+\caption{Saída do programa nos casos de verificação.}
+\label{tab:t1}
+\small
+\begin{tabular}{lrr}
+\toprule
+Caso & Esperado & Obtido\\
+\midrule
+Identidade, instância pequena & 4\,366 & \pp\\
+Ótimo global, instância pequena & 1\,875 & \pp\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\pend{saída literal do programa para os dois casos; opcionalmente o exemplo com $n=4$ (custos 39 e 22)}
+
+\subsection{T2: comparação das vizinhanças}\label{sec:res-t2}
+
+Usando \textit{greedy descent} com \textit{random restart} e o mesmo orçamento, comparam-se \textit{swap}, \textit{insertion} e 2-opt nas três instâncias.
+
+\begin{table*}[!t]
+\centering
+\caption{Comparação das vizinhanças no \textit{greedy descent} com \textit{random restart} (média $\pm$ desvio-padrão do melhor $h$ por execução).}
+\label{tab:t2}
+\small
+\begin{tabular}{llcccc}
+\toprule
+Instância & Vizinhança & Melhor $h$ (média $\pm$ dp) & Passos de melhoria & Reinícios & Tempo por movimento (s)\\
+\midrule
+pequena & Swap      & \pp & \pp & \pp & \pp\\
+pequena & Insertion & \pp & \pp & \pp & \pp\\
+pequena & 2-opt     & \pp & \pp & \pp & \pp\\
+\midrule
+intermediária & Swap      & \pp & \pp & \pp & \pp\\
+intermediária & Insertion & \pp & \pp & \pp & \pp\\
+intermediária & 2-opt     & \pp & \pp & \pp & \pp\\
+\midrule
+grande & Swap      & \pp & \pp & \pp & \pp\\
+grande & Insertion & \pp & \pp & \pp & \pp\\
+grande & 2-opt     & \pp & \pp & \pp & \pp\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\pend{resultados do experimento T2}
+
+\textbf{Discussão e escolha da vizinhança.} \pend{qual vizinhança conduz a melhores ótimos locais, qual é mais barata por movimento com avaliação incremental, discussão dos passos de melhoria de cada variante de seleção sob o orçamento (em especial na instância grande, onde uma varredura de \textit{swap} custa 11\,175 avaliações) e justificativa da vizinhança adotada nos demais experimentos}
+
+\subsection{Ganho da avaliação incremental}\label{sec:res-incremental}
+
+\begin{table}[H]
+\centering
+\caption{Tempo de avaliação: completa vs.\ incremental.}
+\label{tab:incremental}
+\small
+\begin{tabular}{lccc}
+\toprule
+Instância & Completa (s) & Incremental (s) & Ganho\\
+\midrule
+pequena       & \pp & \pp & \pp\\
+intermediária & \pp & \pp & \pp\\
+grande        & \pp & \pp & \pp\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\pend{medições de tempo e comentário sobre o ganho observado por tamanho de instância}
+
+\subsection{T3: resultados principais}
+
+\begin{table*}[!t]
+\centering
+\caption{Resultados dos três algoritmos (melhor $h$ por execução). O gap é calculated apenas na instância pequena, com $h^\star=1875$.}
+\label{tab:principal}
+\small
+\begin{tabular}{llcccccc}
+\toprule
+Instância & Algoritmo & Média $\pm$ dp & Mediana & Mínimo & Gap & Tempo médio (s) & Avaliações\\
+\midrule
+pequena & Greedy + restart & \pp & \pp & \pp & \pp & \pp & 50\,000\\
+pequena & Sim.\ annealing  & \pp & \pp & \pp & \pp & \pp & 50\,000\\
+pequena & Alg.\ genético   & \pp & \pp & \pp & \pp & \pp & 50\,000\\
+\midrule
+intermediária & Greedy + restart & \pp & \pp & \pp & --- & \pp & 150\,000\\
+intermediária & Sim.\ annealing  & \pp & \pp & \pp & --- & \pp & 150\,000\\
+intermediária & Alg.\ genético   & \pp & \pp & \pp & --- & \pp & 150\,000\\
+\midrule
+grande & Greedy + restart & \pp & \pp & \pp & --- & \pp & 300\,000\\
+grande & Sim.\ annealing  & \pp & \pp & \pp & --- & \pp & 300\,000\\
+grande & Alg.\ genético   & \pp & \pp & \pp & --- & \pp & 300\,000\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\pend{valores da Tabela~\ref{tab:principal} a partir dos resultados em disco}
+
+\textbf{Boxplots.} A Figura~\ref{fig:box} compara os três algoritmos em cada instância.
+
+\begin{figure*}[!t]
+\centering
+\figpend{3.5cm}{boxplots do melhor $h$ por algoritmo, um painel por instância (arquivo fig\_boxplots.pdf)}
+\caption{Boxplots do melhor $h$ encontrado por execução, por instância e algoritmo.}
+\label{fig:box}
+\end{figure*}
+
+\textbf{Curvas de convergência.} A Figura~\ref{fig:conv} apresenta a mediana do melhor $h$ em função das avaliações, e, para o GA, a curva da média da população.
+
+\begin{figure*}[!t]
+\centering
+\figpend{3.8cm}{curvas de convergência por instância (arquivo fig\_convergencia.pdf)}
+\caption{Curvas de convergência (mediana das execuções). A distância entre a curva do melhor e a da média da população do GA indica a perda de diversidade.}
+\label{fig:conv}
+\end{figure*}
+
+\textbf{Testes estatísticos.}
+
+\begin{table}[H]
+\centering
+\caption{$p$-valores do teste de Mann--Whitney (bilateral).}
+\label{tab:pvalores}
+\small
+\begin{tabular}{lccc}
+\toprule
+Comparação & pequena & interm. & grande\\
+\midrule
+Greedy vs.\ SA & \pp & \pp & \pp\\
+Greedy vs.\ GA & \pp & \pp & \pp\\
+SA vs.\ GA     & \pp & \pp & \pp\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\pend{p-valores (e correção, se aplicável) e leitura de quais diferenças são estatisticamente significativas}
+
+\textbf{Tempo e avaliações.} A Tabela~\ref{tab:principal} apresenta o tempo médio por execução ao lado do número de avaliações. O orçamento é igual entre algoritmos, mas o custo por avaliação não é: operadores como o cruzamento, a avaliação incremental e a manutenção de estruturas da população fazem o tempo de parede diferir mesmo com avaliações idênticas.
+
+\pend{discussão da diferença entre as métricas (avaliações vs.\ tempo de parede) com base nos tempos medidos}
+
+\subsection{Discussão}
+
+\textbf{Ótimos locais.}
+\pend{número de ótimos locais distintos do \textit{greedy descent} na instância pequena; em quantas execuções cada algoritmo atingiu $h^\star=1875$; relação com a discussão de ótimo local $\times$ ótimo global}
+
+\textbf{Exploração $\times$ intensificação.} Em cada algoritmo, identificam-se os seguintes mecanismos candidatos; a análise deve apoiá-los em dados (Seção~\ref{sec:protocolo}):
+
+\begin{itemize}
+  \item \textit{Greedy + restart}: a descida intensifica; o \textit{restart} explora.
+  \item \textit{Simulated annealing}: a aceitação de piores (alta $T$) explora; o resfriamento leva à intensificação.
+  \item GA: o cruzamento e a mutação exploram; a seleção e o elitismo intensificam.
+\end{itemize}
+
+\pend{evidências nos dados de onde o equilíbrio foi bem ou mal ajustado: taxa de aceitação do SA (gráfico), diversidade do GA, número de reinícios do \textit{greedy}}
+
+\begin{figure}[H]
+\centering
+\figpend{3.2cm}{taxa de aceitação do SA ao longo da execução (arquivo fig\_aceitacao.pdf)}
+\caption{Taxa de aceitação de movimentos piores no \textit{simulated annealing}.}
+\label{fig:aceitacao}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\figpend{3.2cm}{diversidade da população do GA por geração (arquivo fig\_diversidade.pdf)}
+\caption{Evolução da diversidade da população do algoritmo genético.}
+\label{fig:diversidade}
+\end{figure}
+
+\textbf{Efeito da escala.}
+\pend{o ranking muda entre a instância pequena e a grande? Hipótese (se mudar) ou evidência estatística de estabilidade (se não mudar)}
+
+\textbf{Quando o algoritmo genético compensa?}
+\pend{existe instância em que o GA supera significativamente as duas abordagens de busca local? Citar os $p$-valores}
+
+\subsubsection{Experimento adicional: a recombinação combina bons trechos?}
+
+\textbf{Hipótese.} O GA só traz vantagem sobre a busca local se a recombinação conseguir juntar bons trechos de sequência de dois pais em um filho melhor, isto é, se a codificação por permutação preservar blocos úteis (por exemplo, subsequências de ativos com prazos próximos visitadas em boa ordem). Se o cruzamento produzir filhos em geral piores que ambos os pais, o GA funciona como uma busca aleatória guiada pela mutação e pela seleção.
+
+\textbf{Experimento proposto.} Duas medidas complementares sobre o mesmo orçamento e as mesmas instâncias:
+
+\begin{enumerate}
+  \item \textbf{Ablação:} comparar o GA completo com uma versão sem cruzamento ($P_c=0$, apenas mutação, seleção e elitismo), com o mesmo $N$ e $B$, usando Mann--Whitney sobre o melhor $h$ final.
+  \item \textbf{Qualidade dos filhos:} em cada geração, registrar a fração de filhos com $h$ menor que o de ambos os pais, menor que o do melhor pai e maior que o de ambos, e como essas frações evoluem à medida que a diversidade cai.
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\caption{Experimento adicional: efeito do cruzamento.}
+\label{tab:extra}
+\small
+\begin{tabular}{lccc}
+\toprule
+Métrica & pequena & interm. & grande\\
+\midrule
+Melhor $h$, GA completo (média) & \pp & \pp & \pp\\
+Melhor $h$, GA sem cruzamento (média) & \pp & \pp & \pp\\
+$p$-valor (Mann--Whitney) & \pp & \pp & \pp\\
+Filhos melhores que ambos os pais (\%) & \pp & \pp & \pp\\
+Filhos piores que ambos os pais (\%) & \pp & \pp & \pp\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\pend{resultados do experimento e a interpretação: a hipótese foi sustentada ou refutada pelos dados?}

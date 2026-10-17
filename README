@@ -2,4 +2,83 @@ Documentção do TP 2
 
 como compilar:
 
-xelatex "Fundamentos de IA.tex"
+xelatex "main.tex"
+
+
+===============================================================================
+CHECKLIST DE PENDÊNCIAS E MARCAÇÕES DO RELATÓRIO (TP2 - FIA)
+===============================================================================
+
+-------------------------------------------------------------------------------
+1. RESUMO & PREÂMBULO
+-------------------------------------------------------------------------------
+[ ] Resumo:
+    - Resumir os principais resultados quantitativos (2 a 3 frases sobre qual
+      algoritmo foi melhor em cada instância, o gap no n=12 e a conclusão da
+      recombinação no GA).
+
+-------------------------------------------------------------------------------
+2. SEÇÃO 3: ALGORITMOS E IMPLEMENTAÇÃO
+-------------------------------------------------------------------------------
+[ ] Seção 3.1 (Arquitetura):
+    - Linguagem de programação, versão e bibliotecas principais.
+    - Gerador de números aleatórios e política de sementes (uma semente por
+      execução, registrada em disco).
+
+[ ] Seção 3.2 (Avaliação Incremental):
+    - Vizinhança(s) em que a avaliação incremental foi implementada.
+    - Descrição do teste automático de concordância com a avaliação completa e
+      o seu resultado.
+
+[ ] Seção 3.3 (Greedy Descent com Random Restart):
+    - Variantes de seleção efetivamente implementadas (mínimo duas) e a variante
+      adotada nos experimentos principais, com justificativa.
+    - Critério de detecção de ótimo local/reinício da variante aleatória (se
+      implementada).
+
+[ ] Seção 3.4 (Simulated Annealing):
+    - Alvos de aceitação inicial/final e tamanho da amostra de calibração.
+    - Tabela 4: Parâmetros do SA por instância (T0, Tf, alpha e m para pequena,
+      intermediária e grande).
+
+[ ] Seção 3.5 (Algoritmo Genético):
+    - Operador de seleção adotado (tamanho do torneio ou fórmula de conversão
+      custo -> aptidão) e justificativa.
+    - Operador de cruzamento adotado (OX, PMX ou arestas) e justificativa.
+    - Operador de mutação adotado.
+    - Tabela 5: Parâmetros do GA por instância (N, Pc, Pm, Elitismo, Torneio).
+    - Descrição de como os parâmetros foram escolhidos e testados.
+
+-------------------------------------------------------------------------------
+3. SEÇÃO 4: PROTOCOLO EXPERIMENTAL
+-------------------------------------------------------------------------------
+[ ] Seção 4.2 (Métricas e Estatística):
+    - Teste estatístico e método de correção para múltiplas comparações (ex.:
+      Holm/Bonferroni) efetivamente usados, e a biblioteca empregada.
+
+[ ] Seção 4.4 (Ambiente de Execução):
+    - Descrição do hardware (CPU, RAM), sistema operacional e versões do
+      interpretador/compilador usados nas medições de tempo.
+
+[ ] Seção 4.5 (Reprodutibilidade):
+    - Endereço do repositório ou nome do arquivo .zip e referência aos comandos
+      do README no Anexo A.
+
+-------------------------------------------------------------------------------
+4. SEÇÃO 5: RESULTADOS E ANÁLISE
+-------------------------------------------------------------------------------
+[ ] Tabela 6 (T1 - Validação):
+    - Saída literal do programa para o caso Identidade e Ótimo Global
+      (opcionalmente o exemplo com n=4).
+
+[ ] Tabela 7 (T2 - Comparação das Vizinhanças):
+    - Preencher Melhor h (média +/- dp), Passos de melhoria, Reinícios e Tempo
+      por movimento para Swap, Insertion e 2-opt nas 3 instâncias.
+    - Texto da discussão: Vizinhança adotada, qual é mais barata por movimento,
+      passos de melhoria por variante de seleção (especialmente na grande).
+
+[ ] Tabela 8 (Ganho da Avaliação Incremental):
+    - Preencher tempo da Avaliação Completa (s), Incremental (s) e Ganho por
+      instância, além do comentário explicativo no texto.
+
+[ ] Tabela 9 (T3 - Resultados Principais):

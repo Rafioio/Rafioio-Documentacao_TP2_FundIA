@@ -1,0 +1,19 @@
+%======================================================================
+\section{Introdução}
+%======================================================================
+
+Uma concessionária de distribuição de energia precisa executar a manutenção preventiva de $n$ ativos (religadores, transformadores de distribuição e chaves seccionadoras) com uma única equipe, que parte de uma base e atende um ativo por vez. Cada ativo possui posição, duração de serviço, prazo regulatório e um peso de criticidade que representa o custo por hora de atraso. A ordem de visita determina tanto o tempo gasto em deslocamentos quanto os atrasos incorridos, e o objetivo é encontrar a ordem que minimiza o atraso ponderado total.
+
+O espaço de busca possui $n!$ soluções; para $n=150$, esse número tem mais de 260 algarismos, o que inviabiliza qualquer enumeração. Trata-se de um problema de otimização combinatória sem restrições rígidas: toda permutação é viável e há apenas uma função de custo a minimizar. Dois critérios gulosos antagônicos --- visitar o ativo mais próximo ou o mais urgente --- não produzem, isoladamente, boas soluções, o que torna o problema adequado para comparar métodos de busca mais elaborados.
+
+O objetivo do trabalho é comparar, em um problema prático de engenharia, heurísticas de busca local e uma metaheurística populacional, observando na prática o equilíbrio entre \textit{exploração} (visitar regiões diferentes do espaço de busca) e \textit{intensificação} (refinar soluções em uma região promissora). Os três algoritmos são:
+
+\begin{itemize}
+  \item \textbf{(A)} \textit{greedy descent} com \textit{random restart};
+  \item \textbf{(B)} \textit{simulated annealing};
+  \item \textbf{(C)} algoritmo genético (\textit{genetic algorithm}, GA).
+\end{itemize}
+
+A comparação segue um protocolo único: o recurso contabilizado é o número de avaliações da função $h$, e todos os algoritmos recebem o mesmo orçamento por instância (Seção~\ref{sec:protocolo}). A pergunta central, a ser respondida com dados na Seção~\ref{sec:resultados}, é qual a relação entre cada algoritmo e a estrutura do problema --- em particular, se a recombinação do GA consegue combinar bons trechos de sequência de dois pais.
+
+\textbf{Organização.} A Seção~\ref{sec:modelagem} apresenta a modelagem formal. A Seção~\ref{sec:algoritmos} descreve a arquitetura do código e os três algoritmos. A Seção~\ref{sec:protocolo} detalha a metodologia experimental. A Seção~\ref{sec:resultados} apresenta os resultados e a análise comparativa, e a Seção~\ref{sec:conclusoes} traz as conclusões.
