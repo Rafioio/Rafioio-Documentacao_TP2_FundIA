@@ -87,21 +87,102 @@ grande        & \pp & \pp & \pp\\
 Instância & Algoritmo & Média $\pm$ dp & Mediana & Mínimo & Gap & Tempo médio (s) & Avaliações\\
 \midrule
 pequena & Greedy + restart & \pp & \pp & \pp & \pp & \pp & 50\,000\\
-pequena & Sim.\ annealing  & \pp & \pp & \pp & \pp & \pp & 50\,000\\
+pequena & Sim.\ annealing  & 1\,881{,}4 $\pm$ 24{,}0 & 1\,875 & 1\,875 & 0{,}34\% & 0{,}39 & 50\,000\\
 pequena & Alg.\ genético   & \pp & \pp & \pp & \pp & \pp & 50\,000\\
 \midrule
 intermediária & Greedy + restart & \pp & \pp & \pp & --- & \pp & 150\,000\\
-intermediária & Sim.\ annealing  & \pp & \pp & \pp & --- & \pp & 150\,000\\
+intermediária & Sim.\ annealing  & 21\,739{,}5 $\pm$ 1\,499{,}1 & 21\,609{,}5 & 18\,612 & --- & 2{,}38 & 150\,000\\
 intermediária & Alg.\ genético   & \pp & \pp & \pp & --- & \pp & 150\,000\\
 \midrule
 grande & Greedy + restart & \pp & \pp & \pp & --- & \pp & 300\,000\\
-grande & Sim.\ annealing  & \pp & \pp & \pp & --- & \pp & 300\,000\\
+grande & Sim.\ annealing  & 161\,037{,}2 $\pm$ 10\,750{,}9 & 161\,576 & 137\,865 & --- & 10{,}76 & 300\,000\\
 grande & Alg.\ genético   & \pp & \pp & \pp & --- & \pp & 300\,000\\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-\pend{valores da Tabela~\ref{tab:principal} a partir dos resultados em disco}
+\pend{valores do \textit{greedy descent} e do GA na Tabela~\ref{tab:principal} a partir dos resultados em disco}
+
+\textbf{\textit{Simulated annealing}.} O gap do SA na Tabela~\ref{tab:principal} é o da média; o tempo é o do algoritmo, sem a gravação do \texttt{.csv}. Rodar de novo as sementes das instâncias pequena e intermediária reproduz os mesmos $h$ finais gravados nos \texttt{.csv}.
+
+Na instância pequena, o SA chegou a $h^\star=1875$ em 27 das 30 execuções. As outras três terminaram em 1\,887, 1\,937 e 1\,993. Na mediana, a melhor solução apareceu na avaliação 31\,104 (62\% do orçamento), e o resto da execução ficou perto do ótimo.
+
+Na intermediária, a média ficou 33\% acima do melhor valor conhecido (16\,332), e a melhor execução (18\,612), 14\% acima. Na grande, a média foi 2{,}7 vezes o melhor conhecido (60\,417), e mesmo a melhor execução (137\,865) ficou 128\% acima. Nessas duas instâncias a melhor solução só aparece no fim: na mediana, na avaliação 147\,038 de 150\,000 (98\%) e 298\,680 de 300\,000 (99{,}6\%). Na grande, a mediana do melhor $h$ ainda caiu de 188\,806 para 161\,576 nos últimos 10\% do orçamento, ou seja, o orçamento acaba com a busca ainda descendo.
+
+A razão entre o orçamento e o tamanho da vizinhança de \textit{swap}, $B/|N|$, ajuda a explicar a piora com $n$: ela vale 758 na pequena ($50\,000/66$), 122 na intermediária e 27 na grande. Como $T_0$ foi calibrada em permutações aleatórias e o resfriamento é geométrico, até a metade do orçamento o SA ainda aceita mais de 15\% dos movimentos piores nas três instâncias (Figura~\ref{fig:aceitacao}). Na grande, a mediana do $h$ corrente na janela que começa na metade da execução é 605\,532, dez vezes o valor de referência, e restam poucas avaliações em temperatura baixa para refinar a solução. Uma $T_0$ menor ou um orçamento maior deslocariam a fase de refinamento para mais cedo ou a tornariam mais longa; esse ajuste não foi testado neste trabalho.
+
+\textbf{Convergência das execuções do SA.} A Figura~\ref{fig:conv-sa} mostra o melhor $h$ de cada execução ao longo do orçamento, com as 5, 10 e 15 primeiras sementes de cada instância, e a Tabela~\ref{tab:conv-sa} compara entre si todas as execuções do protocolo (30, 30 e 10). Para comparar as soluções finais, usam-se a distância de Hamming da Seção~\ref{sec:ga} e o deslocamento médio de posição, $\frac1n\sum_j|\mathrm{pos}_\pi(j)-\mathrm{pos}_\sigma(j)|$, em que $\mathrm{pos}_\pi(j)$ é a posição do ativo $j$ em $\pi$. Entre duas permutações sorteadas ao acaso, os valores esperados são $n-1$ e $(n^2-1)/(3n)$.
+
+Na instância pequena, as execuções convergem para a mesma solução. As 27 que chegam a $h^\star=1875$ terminam na mesma permutação, $(5,4,1,6,7,2,8,12,3,10,9,11)$, a partir de 27 permutações iniciais diferentes. Entre as 30 execuções há só 4 soluções finais distintas, e a distância de Hamming média entre pares é 0{,}85. O ótimo é alcançado entre as avaliações 24\,158 e 36\,987 (48\% a 74\% do orçamento). A partir de 75\% do orçamento, o primeiro quartil, a mediana e o terceiro quartil do melhor $h$ valem 1\,875.
+
+Na intermediária, as 30 execuções terminam em 30 soluções diferentes, com distância de Hamming média de 47{,}0, perto das 49 esperadas entre permutações aleatórias. O deslocamento médio de posição, 9{,}4, fica abaixo dos 16{,}7 esperados ao acaso. Os ativos tendem a ocupar a mesma região da sequência em todas as execuções, mas quase nenhum fica na mesma posição. A grande repete o padrão, com Hamming médio de 148{,}1 (149 ao acaso) e deslocamento de 33{,}4 (50{,}0 ao acaso).
+
+O coeficiente de variação (CV) do melhor $h$ entre execuções evolui de forma diferente em cada instância. Na pequena, ele cai de 8{,}1\% com 25\% do orçamento para 1{,}3\% no fim. Na grande, ele sobe de 2{,}2\% para 6{,}7\%: no início todas as execuções estão na mesma faixa de $h$ alto, e as diferenças aparecem quando elas descem em ritmos diferentes. Na intermediária, o CV fica entre 4{,}9\% e 8{,}7\% durante toda a execução. Na mediana, uma execução chega a 5\% do seu próprio valor final com 56\% do orçamento na pequena, 93\% na intermediária e 98\% na grande. Nas duas maiores, as curvas da Figura~\ref{fig:conv-sa} ainda descem quando o orçamento acaba, e cada execução para em um ponto diferente dessa descida. Por isso as soluções finais diferem tanto entre si.
+
+\begin{table}[H]
+\centering
+\caption{Convergência das execuções do SA em cada instância: soluções finais distintas, distância de Hamming e deslocamento médio de posição entre soluções finais, coeficiente de variação (CV) do melhor $h$ com 25\%, 50\% e 100\% do orçamento e fração mediana do orçamento até chegar a 5\% do $h$ final. Entre parênteses, o valor esperado entre duas permutações aleatórias.}
+\label{tab:conv-sa}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Métrica & pequena & interm. & grande\\
+\midrule
+Finais distintas & 4/30 & 30/30 & 10/10\\
+Hamming & 0{,}85 (11) & 47{,}0 (49) & 148{,}1 (149)\\
+Deslocamento & 0{,}12 (3{,}97) & 9{,}4 (16{,}7) & 33{,}4 (50{,}0)\\
+CV 25\% (\%) & 8{,}1 & 4{,}9 & 2{,}2\\
+CV 50\% (\%) & 7{,}0 & 6{,}4 & 3{,}2\\
+CV 100\% (\%) & 1{,}3 & 6{,}9 & 6{,}7\\
+Até 5\% do final & 0{,}56 & 0{,}93 & 0{,}98\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Quantidade de execuções.} Os gráficos da Figura~\ref{fig:conv-sa} usam as sementes 0 a $k-1$ para $k=5$, 10 e 15. Na grande, o protocolo prevê 10 execuções; as sementes 10 a 14 foram rodadas só para esta comparação, com \texttt{python main.py big simulatedAnnealing -{}-runs 15}, e não entram nas Tabelas~\ref{tab:principal} e~\ref{tab:conv-sa}. A mediana das curvas quase não muda com $k$. Com metade do orçamento, ela vale 2\,107, 2\,052 e 2\,107 na pequena, 49\,855, 50\,185 e 52\,009 na intermediária e 522\,533, 523\,435 e 524\,337 na grande. A média do $h$ final varia no máximo 2\% entre $k=5$ e $k=15$ (Tabela~\ref{tab:runs-sa}), então 5 execuções já mostram a forma da descida e o nível de $h$ que o SA alcança.
+
+A dispersão depende bem mais de $k$. Na grande, o desvio-padrão do $h$ final passa de 5\,019 com 5 execuções para 10\,751 com 10 e 12\,270 com 15, porque a melhor execução (semente 5, 137\,865) e a pior (semente 13, 189\,046) estão fora das 5 primeiras. Na intermediária, a melhor execução (semente 7, 18\,612) só aparece a partir de $k=10$. Na pequena acontece o contrário: a única das 15 primeiras execuções que não chega a 1\,875 (semente 3, 1\,937) já está entre as 5 primeiras, e o desvio-padrão cai de 27{,}7 para 16{,}0 à medida que entram execuções que terminam no ótimo. Cinco execuções bastam para descrever a curva típica do SA, mas subestimam a variabilidade: na grande, o desvio-padrão medido com 5 execuções é menos da metade do medido com 10 ou 15. Isso afeta os testes de Mann--Whitney da Tabela~\ref{tab:pvalores}, que dependem da dispersão das amostras.
+
+\begin{table}[H]
+\centering
+\caption{$h$ final do SA com as $k$ primeiras sementes de cada instância.}
+\label{tab:runs-sa}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+Instância & $k$ & Média $\pm$ dp & Mínimo & Máximo\\
+\midrule
+pequena & 5  & 1\,887{,}4 $\pm$ 27{,}7 & 1\,875 & 1\,937\\
+        & 10 & 1\,881{,}2 $\pm$ 19{,}6 & 1\,875 & 1\,937\\
+        & 15 & 1\,879{,}1 $\pm$ 16{,}0 & 1\,875 & 1\,937\\
+\midrule
+interm. & 5  & 21\,517{,}4 $\pm$ 1\,776{,}6 & 19\,872 & 23\,622\\
+        & 10 & 21\,162{,}4 $\pm$ 1\,711{,}7 & 18\,612 & 23\,622\\
+        & 15 & 21\,276{,}1 $\pm$ 1\,526{,}8 & 18\,612 & 23\,622\\
+\midrule
+grande  & 5  & 160\,267{,}4 $\pm$ 5\,018{,}7 & 153\,192 & 166\,807\\
+        & 10 & 161\,037{,}2 $\pm$ 10\,750{,}9 & 137\,865 & 180\,136\\
+        & 15 & 163\,411{,}2 $\pm$ 12\,269{,}6 & 137\,865 & 189\,046\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.30\textwidth]{figuras/sa_small_5runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/sa_small_10runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/sa_small_15runs.pdf}\\[2pt]
+\includegraphics[width=0.30\textwidth]{figuras/sa_medium_5runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/sa_medium_10runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/sa_medium_15runs.pdf}\\[2pt]
+\includegraphics[width=0.30\textwidth]{figuras/sa_big_5runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/sa_big_10runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/sa_big_15runs.pdf}
+\caption{Avaliação $\times$ melhor $h$ de cada execução do SA, gráficos gerados por \texttt{compareRuns}. Linhas: instâncias pequena (\texttt{small}), intermediária (\texttt{medium}) e grande (\texttt{big}). Colunas: sementes 0 a 4, 0 a 9 e 0 a 14. O eixo $y$ está em escala logarítmica, a linha preta é a mediana das execuções do gráfico, e o título traz a média $\pm$ desvio-padrão do $h$ final.}
+\label{fig:conv-sa}
+\end{figure*}
 
 \textbf{Boxplots.} A Figura~\ref{fig:box} compara os três algoritmos em cada instância.
 
@@ -147,7 +228,7 @@ SA vs.\ GA     & \pp & \pp & \pp\\
 
 \subsection{Discussão}
 
-\textbf{Ótimos locais.}
+\textbf{Ótimos locais.} O SA atingiu o ótimo global $h^\star=1875$ em 27 das 30 execuções da instância pequena.
 \pend{número de ótimos locais distintos do \textit{greedy descent} na instância pequena; em quantas execuções cada algoritmo atingiu $h^\star=1875$; relação com a discussão de ótimo local $\times$ ótimo global}
 
 \textbf{Exploração $\times$ intensificação.} Em cada algoritmo, identificam-se os seguintes mecanismos candidatos; a análise deve apoiá-los em dados (Seção~\ref{sec:protocolo}):
@@ -158,12 +239,31 @@ SA vs.\ GA     & \pp & \pp & \pp\\
   \item GA: o cruzamento e a mutação exploram; a seleção e o elitismo intensificam.
 \end{itemize}
 
-\pend{evidências nos dados de onde o equilíbrio foi bem ou mal ajustado: taxa de aceitação do SA (gráfico), diversidade do GA, número de reinícios do \textit{greedy}}
+No SA, a taxa de aceitação de movimentos piores (Figura~\ref{fig:aceitacao}) cai de cerca de 0{,}75 para 0{,}01 a 0{,}03 nas três instâncias, sem ficar alta até o fim e sem zerar logo no início. Na instância pequena a exploração termina com tempo de sobra, e 27 das 30 execuções chegam ao ótimo. Nas maiores, a mesma forma de curva deixa pouco orçamento para intensificar: a metade inicial do orçamento é gasta em uma região de $h$ muito alto (na grande, a mediana do $h$ corrente nas primeiras janelas passa de $10^6$), e a melhor solução ainda melhora na última janela.
+
+\pend{evidências nos dados de onde o equilíbrio foi bem ou mal ajustado: diversidade do GA e número de reinícios do \textit{greedy}}
 
 \begin{figure}[H]
 \centering
-\figpend{3.2cm}{taxa de aceitação do SA ao longo da execução (arquivo fig\_aceitacao.pdf)}
-\caption{Taxa de aceitação de movimentos piores no \textit{simulated annealing}.}
+\begin{tikzpicture}
+\begin{axis}[
+  width=\columnwidth, height=4.6cm,
+  xmin=0, xmax=1, ymin=0, ymax=0.8,
+  xlabel={fração do orçamento $B$ consumida},
+  ylabel={piores aceitos / piores},
+  tick label style={font=\scriptsize}, label style={font=\footnotesize},
+  legend style={font=\scriptsize, draw=none, fill=none}, legend pos=north east,
+  /pgf/number format/use comma,
+]
+\addplot[thick, black, solid] coordinates {(0.010,0.767)(0.030,0.746)(0.050,0.724)(0.070,0.707)(0.090,0.680)(0.110,0.665)(0.130,0.639)(0.150,0.603)(0.170,0.575)(0.190,0.548)(0.210,0.523)(0.230,0.489)(0.250,0.468)(0.270,0.428)(0.290,0.401)(0.310,0.371)(0.330,0.345)(0.350,0.311)(0.370,0.292)(0.390,0.265)(0.410,0.238)(0.430,0.210)(0.450,0.196)(0.470,0.174)(0.490,0.149)(0.510,0.139)(0.530,0.118)(0.550,0.107)(0.570,0.096)(0.590,0.084)(0.610,0.072)(0.630,0.062)(0.650,0.055)(0.670,0.049)(0.690,0.040)(0.710,0.034)(0.730,0.030)(0.750,0.025)(0.770,0.025)(0.790,0.022)(0.810,0.019)(0.830,0.018)(0.850,0.017)(0.870,0.015)(0.890,0.012)(0.910,0.011)(0.930,0.010)(0.950,0.010)(0.970,0.009)(0.990,0.008)};
+\addlegendentry{pequena}
+\addplot[thick, blue, dashed] coordinates {(0.010,0.728)(0.030,0.709)(0.050,0.687)(0.070,0.670)(0.090,0.644)(0.110,0.622)(0.130,0.599)(0.150,0.571)(0.170,0.549)(0.190,0.525)(0.210,0.496)(0.230,0.471)(0.250,0.444)(0.270,0.424)(0.290,0.392)(0.310,0.366)(0.330,0.341)(0.350,0.313)(0.370,0.296)(0.390,0.268)(0.410,0.252)(0.430,0.231)(0.450,0.210)(0.470,0.195)(0.490,0.176)(0.510,0.162)(0.530,0.152)(0.550,0.137)(0.570,0.127)(0.590,0.117)(0.610,0.106)(0.630,0.098)(0.650,0.093)(0.670,0.082)(0.690,0.076)(0.710,0.068)(0.730,0.063)(0.750,0.059)(0.770,0.053)(0.790,0.049)(0.810,0.045)(0.830,0.040)(0.850,0.038)(0.870,0.034)(0.890,0.030)(0.910,0.028)(0.930,0.024)(0.950,0.024)(0.970,0.021)(0.990,0.020)};
+\addlegendentry{intermediária}
+\addplot[thick, red, dotted] coordinates {(0.010,0.768)(0.030,0.751)(0.050,0.737)(0.070,0.721)(0.090,0.697)(0.110,0.675)(0.130,0.649)(0.150,0.627)(0.170,0.613)(0.190,0.588)(0.210,0.562)(0.230,0.547)(0.250,0.509)(0.270,0.487)(0.290,0.457)(0.310,0.434)(0.330,0.410)(0.350,0.389)(0.370,0.358)(0.390,0.337)(0.410,0.312)(0.430,0.284)(0.450,0.270)(0.470,0.242)(0.490,0.229)(0.510,0.208)(0.530,0.192)(0.550,0.173)(0.570,0.165)(0.590,0.152)(0.610,0.141)(0.630,0.128)(0.650,0.118)(0.670,0.106)(0.690,0.097)(0.710,0.090)(0.730,0.081)(0.750,0.077)(0.770,0.070)(0.790,0.063)(0.810,0.056)(0.830,0.052)(0.850,0.048)(0.870,0.043)(0.890,0.038)(0.910,0.036)(0.930,0.033)(0.950,0.031)(0.970,0.028)(0.990,0.025)};
+\addlegendentry{grande}
+\end{axis}
+\end{tikzpicture}
+\caption{Taxa de aceitação de movimentos piores no \textit{simulated annealing}: fração dos sucessores piores que foram aceitos em cada uma de 50 janelas do orçamento, média das execuções (30, 30 e 10).}
 \label{fig:aceitacao}
 \end{figure}
 

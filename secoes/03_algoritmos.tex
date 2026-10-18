@@ -4,28 +4,35 @@
 
 \subsection{Arquitetura}
 
-Os três algoritmos são genéricos e interagem com o problema apenas por uma interface comum (Tabela~\ref{tab:interface}). Essa separação permite executar as 9 combinações (3 algoritmos $\times$ 3 instâncias) sem alterar o código dos algoritmos e centralizar a contagem de avaliações em um único ponto: cada chamada a $h$ incrementa um contador único, inclusive a reavaliação da solução corrente.
+Os três algoritmos são métodos da classe \texttt{Solver} e acessam o problema apenas pelas classes e funções da Tabela~\ref{tab:interface}. As 9 combinações (3 algoritmos $\times$ 3 instâncias) rodam sem mudar o código dos algoritmos, e a vizinhança é escolhida pelo nome do operador (\texttt{swap}, \texttt{insertion} ou \texttt{invert}).
 
 \begin{table}[H]
 \centering
-\caption{Interface entre algoritmos e problema.}
+\caption{Interface entre algoritmos e problema no código.}
 \label{tab:interface}
 \small
-\begin{tabular}{p{3.2cm}p{4.6cm}}
+\begin{tabular}{p{3.9cm}p{3.9cm}}
 \toprule
-Método & Papel\\
+Elemento & Papel\\
 \midrule
-\texttt{solucao\_aleatoria()} & gera uma permutação inicial\\
-\texttt{h(s)} & fitness (minimização)\\
-\texttt{sucessores(s)} & itera sobre todos os sucessores\\
-\texttt{sucessor\_aleatorio(s)} & sorteia um sucessor\\
-\texttt{cruzamento(s1,s2)} & recombinação\\
-\texttt{mutacao(s)} & mutação\\
+\texttt{setOfAssets.shake(rng)} & gera uma permutação aleatória\\
+\texttt{objetiveFunction(a,s)} & $h(\pi)$, Eq.~\eqref{eq:h}\\
+\texttt{swap}, \texttt{insertion}, \texttt{invert} & sucessor de $\pi$ pelas posições $(i,j)$\\
+\texttt{generatePermutations(n)} & pares $(i,j)$ para varrer a vizinhança\\
+\texttt{rng.sample(range(n),2)} & sorteia um sucessor (SA)\\
+\texttt{Solver.crossing} & recombinação\\
+\texttt{Solver.mutateSolution} & mutação\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\pend{linguagem/versão, bibliotecas, gerador aleatório e política de sementes (uma semente por execução, registrada em disco)}
+\textbf{Organização do código.} O código fica em \texttt{src/core} (modelo e algoritmos), \texttt{src/utils} (leitura da instância e gravação dos resultados) e \texttt{main.py}. A classe \texttt{Assets} guarda os dados lidos por \texttt{readInput} ($n$, base e, por ativo, posição, $p_j$, $d_j$ e $w_j$, com o ativo $j$ no índice $j-1$) e calcula $t_{ij}$ pela Eq.~\eqref{eq:tij}. A classe \texttt{setOfAssets} é a solução candidata: guarda o vetor $\pi$ e uma referência ao \texttt{Assets} compartilhado, de modo que copiar uma solução copia só $\pi$. O construtor rejeita vetores que não sejam permutação de $1,\dots,n$. Os operadores de vizinhança recebem posições de $\pi$ ($0,\dots,n-1$) e devolvem uma solução nova, sem alterar a atual. A função \texttt{objetiveFunction} calcula $h$ pelas Eqs.~\eqref{eq:conclusao} e~\eqref{eq:h} em $O(n)$. A classe \texttt{Solver} reúne os algoritmos e a tabela \texttt{PROTOCOL}, que guarda por instância o orçamento $B$, o número de execuções e as temperaturas $T_0$ e $T_f$ do SA. Cada algoritmo identifica a instância pelo $n$ do \texttt{Assets} recebido. Em \texttt{src/utils/runsComparison.py}, a função \texttt{readHistory} lê o \texttt{.csv} de uma execução e recalcula $h$ de cada avaliação, e \texttt{compareRuns} usa esses históricos para gerar um gráfico de avaliação $\times$ melhor $h$ por quantidade de execuções comparadas (Figura~\ref{fig:conv-sa}).
+
+\textbf{Linguagem, bibliotecas e aleatoriedade.} O código é escrito em Python~3.14.7 com NumPy~2.5.4, usado nos vetores do histórico e nas estatísticas, e Matplotlib~3.11.2, usado nos gráficos; o \texttt{requirements.txt} também fixa o pytest~9.1.1. No SA e no \textit{greedy descent}, a única fonte de aleatoriedade de uma execução é um \texttt{random.Random} da biblioteca padrão (Mersenne Twister) guardado em \texttt{Solver.rng}. Cada algoritmo recria esse gerador a partir de \texttt{Solver.seed} ao começar. Por isso, algoritmos diferentes com a mesma semente partem da mesma permutação inicial, e repetir uma execução reproduz o mesmo resultado.
+
+\textbf{Política de sementes.} O \texttt{main.py} executa as sementes $0,1,\dots,R-1$, com $R$ o número de execuções da Tabela~\ref{tab:orcamento}, e grava cada execução em \texttt{outputs/<instância>/<algoritmo>/seed\_<s>.csv}. A semente fica registrada no nome do arquivo. Cada linha do \texttt{.csv} é a permutação corrente após uma avaliação, na ordem em que as avaliações ocorreram, e a última linha é a melhor solução da execução. Ao final, o programa imprime o $h$ final de cada semente e a média, o desvio-padrão, o mínimo e a mediana.
+
+\textbf{Contagem de avaliações.} Cada algoritmo conta as avaliações no próprio laço e para ao atingir $B$. No SA, cada iteração chama $h$ exatamente uma vez, e os vetores do histórico (\texttt{Solver.history}) têm $B$ posições, uma por avaliação. A primeira posição corresponde à avaliação da solução inicial.
 
 \subsection{Avaliação incremental}\label{sec:incremental}
 
@@ -53,48 +60,70 @@ Sob orçamento fixo, as variantes diferem fortemente em passos de melhoria por a
 
 \subsection{(B) \textit{Simulated annealing}}\label{sec:sa}
 
-Seja $\pi$ a solução corrente e $\pi'$ um sucessor sorteado ao acaso. Se $h(\pi')\le h(\pi)$, aceita-se $\pi'$; caso contrário, aceita-se com probabilidade
+Seja $\pi$ a solução corrente e $\pi'$ um sucessor sorteado ao acaso. No código, sorteiam-se duas posições distintas com \texttt{rng.sample} e aplica-se o \textit{swap}, que é a vizinhança usada pelo SA em todas as instâncias. Se $h(\pi')\le h(\pi)$, aceita-se $\pi'$; caso contrário, aceita-se com probabilidade
 \begin{equation}
   P=\exp\!\left(-\frac{h(\pi')-h(\pi)}{T}\right),
   \label{eq:gibbs}
 \end{equation}
-a distribuição de Gibbs. Cada sucessor examinado consome uma avaliação.
+a distribuição de Gibbs. Cada sucessor examinado consome uma avaliação, e a melhor solução vista é guardada à parte da corrente.
 
 \textbf{\textit{Annealing schedule}.} Adota-se resfriamento geométrico $T\leftarrow\alpha T$. Como cada iteração consome uma avaliação e o orçamento é $B$, impor $T_f=T_0\,\alpha^{\,B/m}$ com atualização a cada $m$ iterações fornece
 \begin{equation}
   \alpha=\left(\frac{T_f}{T_0}\right)^{m/B}.
   \label{eq:alpha}
 \end{equation}
-Assim, a temperatura chega a $T_f$ exatamente ao esgotar o orçamento, e o resfriamento é ajustado a $B$ de cada instância.
+Assim, a temperatura chega a $T_f$ exatamente ao esgotar o orçamento, e o resfriamento é ajustado a $B$ de cada instância. A implementação usa $m=1$, ou seja, $T$ muda a cada avaliação. A primeira avaliação é a da solução inicial, e o primeiro sucessor ainda é testado com $T_0$; restam $B-2$ multiplicações até a última avaliação, e por isso o código calcula $\alpha=(T_f/T_0)^{1/(B-2)}$.
 
-\textbf{Calibração de $T_0$ e $T_f$.} A escala de $T$ depende da magnitude típica de $h(\pi')-h(\pi)$, que varia de dezenas a milhares e muda com a instância; portanto, os parâmetros são calibrados \textit{por instância}. O procedimento adotado deve ser:
+\textbf{Calibração de $T_0$ e $T_f$.} A escala de $T$ depende da magnitude típica de $\Delta=h(\pi')-h(\pi)$, que vai de dezenas a dezenas de milhares e muda com a instância. Por isso os parâmetros são calibrados \textit{por instância}, com a própria Eq.~\eqref{eq:gibbs}: dada uma amostra $D$ de valores $\Delta>0$, a probabilidade média de aceitar um movimento pior à temperatura $T$ é
+\begin{equation}
+  \bar P(T)=\frac{1}{|D|}\sum_{\Delta\in D}e^{-\Delta/T},
+  \label{eq:pmedia}
+\end{equation}
+que cresce com $T$. Escolhe-se então a temperatura que leva $\bar P$ ao alvo desejado. O procedimento foi:
 
 \begin{enumerate}
-  \item amostrar um conjunto de pares $(\pi,\pi')$ aleatórios por instância e estimar a distribuição de $\Delta=h(\pi')-h(\pi)$ para $\Delta>0$;
-  \item escolher $T_0$ tal que a taxa de aceitação inicial de movimentos piores seja próxima de um alvo alto (quase \textit{random walk});
-  \item escolher $T_f$ tal que a taxa de aceitação final seja praticamente nula (quase \textit{greedy descent});
-  \item verificar a escolha pelo gráfico da taxa de aceitação ao longo da execução.
+  \item para $T_0$, sortear 2\,000 pares $(\pi,\pi')$ por instância, com $\pi$ aleatória e $\pi'$ obtido por um \textit{swap} aleatório, e guardar os $\Delta>0$ (cerca de metade dos pares, entre 994 e 1\,025 valores);
+  \item escolher $T_0$, em número redondo, com $\bar P(T_0)\approx0{,}8$, para que no início a busca aceite cerca de quatro em cada cinco movimentos piores e se comporte quase como \textit{random walk};
+  \item para $T_f$, usar execuções-piloto: em torno da solução final de 5 execuções, sortear 1\,000 \textit{swaps} de cada uma (5\,000 movimentos) e escolher $T_f$ com $\bar P(T_f)$ entre 1\% e 2{,}5\%, para que o fim da execução se comporte quase como \textit{greedy descent};
+  \item conferir a escolha pelo gráfico da taxa de aceitação ao longo da execução (Figura~\ref{fig:aceitacao}).
 \end{enumerate}
 
-\pend{alvos de aceitação, tamanho da amostra de calibração e valores finais de $T_0$, $T_f$, $\alpha$ e $m$ por instância (Tabela~\ref{tab:par-sa})}
+A amostra de $T_f$ é tirada em torno das soluções finais porque ali os $\Delta$ têm outra escala: na instância grande, a mediana de $\Delta>0$ é 7\,688 em permutações aleatórias e 18\,564 em torno das soluções finais. A Tabela~\ref{tab:calib-sa} resume as amostras, e a Tabela~\ref{tab:par-sa} traz os valores adotados.
 
 \begin{table}[H]
 \centering
-\caption{Parâmetros do \textit{simulated annealing} por instância.}
+\caption{Amostras de calibração do SA ($\Delta>0$ de movimentos \textit{swap}) e aceitação média estimada pela Eq.~\eqref{eq:pmedia} nas temperaturas adotadas.}
+\label{tab:calib-sa}
+\small
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{$\pi$ aleatória} & \multicolumn{2}{c}{$\pi$ final (piloto)}\\
+Instância & $\bar\Delta$ & $\bar P(T_0)$ & mediana $\Delta$ & $\bar P(T_f)$\\
+\midrule
+pequena       & 788    & 0{,}79 & 1\,214  & 0{,}013\\
+intermediária & 4\,245  & 0{,}75 & 7\,322  & 0{,}016\\
+grande        & 10\,346 & 0{,}80 & 18\,564 & 0{,}025\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Parâmetros do \textit{simulated annealing} por instância ($m=1$).}
 \label{tab:par-sa}
 \small
 \begin{tabular}{lcccc}
 \toprule
 Instância & $T_0$ & $T_f$ & $\alpha$ & Vizinhança\\
 \midrule
-pequena       & \pp & \pp & \pp & \pp\\
-intermediária & \pp & \pp & \pp & \pp\\
-grande        & \pp & \pp & \pp & \pp\\
+pequena       & 3\,000  & 25  & 0{,}999904 & \textit{swap}\\
+intermediária & 13\,000 & 180 & 0{,}999971 & \textit{swap}\\
+grande        & 41\,000 & 650 & 0{,}999986 & \textit{swap}\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Taxa de aceitação.} Registra-se, em janelas de avaliações, a fração de movimentos \textit{piores} aceitos. Uma têmpera bem calibrada começa quase como \textit{random walk} e termina quase como \textit{greedy descent}; um gráfico que permanece alto indica $T$ alta demais, e um que cai a zero logo no início indica $T$ baixa demais.
+\textbf{Taxa de aceitação.} Registra-se, em janelas de avaliações, a fração de movimentos \textit{piores} aceitos. Uma têmpera bem calibrada começa quase como \textit{random walk} e termina quase como \textit{greedy descent}; um gráfico que permanece alto indica $T$ alta demais, e um que cai a zero logo no início indica $T$ baixa demais. No código, o histórico de cada execução guarda, por avaliação, a temperatura, o $h$ do sucessor, o $h$ corrente, o melhor $h$ e se o sucessor era pior e se foi aceito. A Figura~\ref{fig:aceitacao} divide o orçamento em 50 janelas e mostra a média das execuções. A taxa começa em 0{,}77, 0{,}73 e 0{,}77 e termina em 0{,}008, 0{,}020 e 0{,}025 nas instâncias pequena, intermediária e grande, perto dos alvos da calibração.
 
 \subsection{(C) Algoritmo genético}\label{sec:ga}
 

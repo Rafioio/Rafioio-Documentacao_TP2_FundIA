@@ -38,10 +38,14 @@ Para cada instância, registra-se o melhor $h$ encontrado em função do número
 
 \subsection{Ambiente de execução}
 
-\pend{descrição do hardware (CPU, memória), sistema operacional e versões do interpretador/compilador usados nas medições de tempo}
+As execuções do SA rodaram em um Intel Core i5-14600KF (20 \textit{threads}) com 15~GiB de RAM, Arch Linux (kernel 7.1.9), Python~3.14.7 e NumPy~2.5.4. As execuções são sequenciais e usam uma única \textit{thread}. O tempo é medido com \texttt{time.perf\_counter} dentro do algoritmo e não inclui a leitura da instância nem a gravação do \texttt{.csv}.
+
+\pend{ambiente das execuções do \textit{greedy descent} e do GA, se diferente}
 
 \subsection{Reprodutibilidade}
 
 O código acompanha um \texttt{README} com os comandos exatos para reproduzir cada tabela e figura. Os resultados brutos de todas as execuções são gravados em arquivos \texttt{.csv}.
 
-\pend{endereço do repositório ou nome do arquivo .zip e os comandos do README para cada tabela e figura (ver Anexo A)}
+O código está em \url{https://github.com/Lucas-Szuster/FUNDIA-TP2}. Cada combinação algoritmo $\times$ instância é executada por \texttt{python main.py <instância> <algoritmo>}, com \texttt{<instância>} em \{\texttt{small}, \texttt{medium}, \texttt{big}\} e \texttt{<algoritmo>} em \{\texttt{greedyDescent}, \texttt{simulatedAnnealing}, \texttt{geneticAlgorithm}\}. Os resultados do SA na Tabela~\ref{tab:principal} vêm de \texttt{python main.py big simulatedAnnealing} e dos comandos equivalentes para \texttt{small} e \texttt{medium}. A opção \texttt{-{}-runs} muda o número de execuções do protocolo, e \texttt{python -m src.utils.runsComparison <instância> <algoritmo>} gera os gráficos de comparação entre 5, 10 e 15 execuções em \texttt{outputs/<instância>/<algoritmo>/}.
+
+\pend{comandos do README para as demais tabelas e figuras (ver Anexo A)}

@@ -21,7 +21,7 @@ CHECKLIST DE PENDÊNCIAS E MARCAÇÕES DO RELATÓRIO (TP2 - FIA)
 -------------------------------------------------------------------------------
 2. SEÇÃO 3: ALGORITMOS E IMPLEMENTAÇÃO
 -------------------------------------------------------------------------------
-[ ] Seção 3.1 (Arquitetura):
+[x] Seção 3.1 (Arquitetura):
     - Linguagem de programação, versão e bibliotecas principais.
     - Gerador de números aleatórios e política de sementes (uma semente por
       execução, registrada em disco).
@@ -37,7 +37,7 @@ CHECKLIST DE PENDÊNCIAS E MARCAÇÕES DO RELATÓRIO (TP2 - FIA)
     - Critério de detecção de ótimo local/reinício da variante aleatória (se
       implementada).
 
-[ ] Seção 3.4 (Simulated Annealing):
+[x] Seção 3.4 (Simulated Annealing):
     - Alvos de aceitação inicial/final e tamanho da amostra de calibração.
     - Tabela 4: Parâmetros do SA por instância (T0, Tf, alpha e m para pequena,
       intermediária e grande).
