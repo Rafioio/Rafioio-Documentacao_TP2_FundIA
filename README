@@ -21,7 +21,7 @@ CHECKLIST DE PENDÊNCIAS E MARCAÇÕES DO RELATÓRIO (TP2 - FIA)
 -------------------------------------------------------------------------------
 2. SEÇÃO 3: ALGORITMOS E IMPLEMENTAÇÃO
 -------------------------------------------------------------------------------
-[ ] Seção 3.1 (Arquitetura):
+[x] Seção 3.1 (Arquitetura):
     - Linguagem de programação, versão e bibliotecas principais.
     - Gerador de números aleatórios e política de sementes (uma semente por
       execução, registrada em disco).

@@ -4,28 +4,35 @@
 
 \subsection{Arquitetura}
 
-Os três algoritmos são genéricos e interagem com o problema apenas por uma interface comum (Tabela~\ref{tab:interface}). Essa separação permite executar as 9 combinações (3 algoritmos $\times$ 3 instâncias) sem alterar o código dos algoritmos e centralizar a contagem de avaliações em um único ponto: cada chamada a $h$ incrementa um contador único, inclusive a reavaliação da solução corrente.
+Os três algoritmos são métodos da classe \texttt{Solver} e acessam o problema apenas pelas classes e funções da Tabela~\ref{tab:interface}. As 9 combinações (3 algoritmos $\times$ 3 instâncias) rodam sem mudar o código dos algoritmos, e a vizinhança é escolhida pelo nome do operador (\texttt{swap}, \texttt{insertion} ou \texttt{invert}).
 
 \begin{table}[H]
 \centering
-\caption{Interface entre algoritmos e problema.}
+\caption{Interface entre algoritmos e problema no código.}
 \label{tab:interface}
 \small
-\begin{tabular}{p{3.2cm}p{4.6cm}}
+\begin{tabular}{p{3.9cm}p{3.9cm}}
 \toprule
-Método & Papel\\
+Elemento & Papel\\
 \midrule
-\texttt{solucao\_aleatoria()} & gera uma permutação inicial\\
-\texttt{h(s)} & fitness (minimização)\\
-\texttt{sucessores(s)} & itera sobre todos os sucessores\\
-\texttt{sucessor\_aleatorio(s)} & sorteia um sucessor\\
-\texttt{cruzamento(s1,s2)} & recombinação\\
-\texttt{mutacao(s)} & mutação\\
+\texttt{setOfAssets.shake(rng)} & gera uma permutação aleatória\\
+\texttt{objetiveFunction(a,s)} & $h(\pi)$, Eq.~\eqref{eq:h}\\
+\texttt{swap}, \texttt{insertion}, \texttt{invert} & sucessor de $\pi$ pelas posições $(i,j)$\\
+\texttt{generatePermutations(n)} & pares $(i,j)$ para varrer a vizinhança\\
+\texttt{rng.sample(range(n),2)} & sorteia um sucessor (SA)\\
+\texttt{Solver.crossing} & recombinação\\
+\texttt{Solver.mutateSolution} & mutação\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\pend{linguagem/versão, bibliotecas, gerador aleatório e política de sementes (uma semente por execução, registrada em disco)}
+\textbf{Organização do código.} O código fica em \texttt{src/core} (modelo e algoritmos), \texttt{src/utils} (leitura da instância e gravação dos resultados) e \texttt{main.py}. A classe \texttt{Assets} guarda os dados lidos por \texttt{readInput} ($n$, base e, por ativo, posição, $p_j$, $d_j$ e $w_j$, com o ativo $j$ no índice $j-1$) e calcula $t_{ij}$ pela Eq.~\eqref{eq:tij}. A classe \texttt{setOfAssets} é a solução candidata: guarda o vetor $\pi$ e uma referência ao \texttt{Assets} compartilhado, de modo que copiar uma solução copia só $\pi$. O construtor rejeita vetores que não sejam permutação de $1,\dots,n$. Os operadores de vizinhança recebem posições de $\pi$ ($0,\dots,n-1$) e devolvem uma solução nova, sem alterar a atual. A função \texttt{objetiveFunction} calcula $h$ pelas Eqs.~\eqref{eq:conclusao} e~\eqref{eq:h} em $O(n)$. A classe \texttt{Solver} reúne os algoritmos e a tabela \texttt{PROTOCOL}, que guarda por instância o orçamento $B$, o número de execuções e as temperaturas $T_0$ e $T_f$ do SA. Cada algoritmo identifica a instância pelo $n$ do \texttt{Assets} recebido.
+
+\textbf{Linguagem, bibliotecas e aleatoriedade.} O código é escrito em Python~3.14.7 com NumPy~2.5.4, usado nos vetores do histórico e nas estatísticas; o \texttt{requirements.txt} também fixa o pytest~9.1.1. No SA e no \textit{greedy descent}, a única fonte de aleatoriedade de uma execução é um \texttt{random.Random} da biblioteca padrão (Mersenne Twister) guardado em \texttt{Solver.rng}. Cada algoritmo recria esse gerador a partir de \texttt{Solver.seed} ao começar. Por isso, algoritmos diferentes com a mesma semente partem da mesma permutação inicial, e repetir uma execução reproduz o mesmo resultado.
+
+\textbf{Política de sementes.} O \texttt{main.py} executa as sementes $0,1,\dots,R-1$, com $R$ o número de execuções da Tabela~\ref{tab:orcamento}, e grava cada execução em \texttt{outputs/<instância>/<algoritmo>/seed\_<s>.csv}. A semente fica registrada no nome do arquivo. Cada linha do \texttt{.csv} é a permutação corrente após uma avaliação, na ordem em que as avaliações ocorreram, e a última linha é a melhor solução da execução. Ao final, o programa imprime o $h$ final de cada semente e a média, o desvio-padrão, o mínimo e a mediana.
+
+\textbf{Contagem de avaliações.} Cada algoritmo conta as avaliações no próprio laço e para ao atingir $B$. No SA, cada iteração chama $h$ exatamente uma vez, e os vetores do histórico (\texttt{Solver.history}) têm $B$ posições, uma por avaliação. A primeira posição corresponde à avaliação da solução inicial.
 
 \subsection{Avaliação incremental}\label{sec:incremental}
 
