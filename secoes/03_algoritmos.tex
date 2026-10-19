@@ -74,56 +74,62 @@ a distribuição de Gibbs. Cada sucessor examinado consome uma avaliação, e a 
 \end{equation}
 Assim, a temperatura chega a $T_f$ exatamente ao esgotar o orçamento, e o resfriamento é ajustado a $B$ de cada instância. A implementação usa $m=1$, ou seja, $T$ muda a cada avaliação. A primeira avaliação é a da solução inicial, e o primeiro sucessor ainda é testado com $T_0$; restam $B-2$ multiplicações até a última avaliação, e por isso o código calcula $\alpha=(T_f/T_0)^{1/(B-2)}$.
 
-\textbf{Calibração de $T_0$ e $T_f$.} A escala de $T$ depende da magnitude típica de $\Delta=h(\pi')-h(\pi)$, que vai de dezenas a dezenas de milhares e muda com a instância. Por isso os parâmetros são calibrados \textit{por instância}, com a própria Eq.~\eqref{eq:gibbs}: dada uma amostra $D$ de valores $\Delta>0$, a probabilidade média de aceitar um movimento pior à temperatura $T$ é
+\textbf{Calibração de $T_0$ e $T_f$.} A escala de $T$ depende da magnitude típica de $\Delta=h(\pi')-h(\pi)$, que vai de dezenas a dezenas de milhares e muda com a instância; uma temperatura calibrada na instância pequena não serve para a grande. Por isso $T_0$ e $T_f$ são calibrados \textit{por instância}, usando só a Eq.~\eqref{eq:gibbs}. A tabela de probabilidades de aceitação vista em aula responde à pergunta ``dados $\Delta$ e $T$, qual a chance de aceitar a piora?''. Aqui ela é lida ao contrário: escolhe-se a chance $P$ com que uma piora $\Delta$ deve ser aceita e isola-se $T$ na Eq.~\eqref{eq:gibbs},
 \begin{equation}
-  \bar P(T)=\frac{1}{|D|}\sum_{\Delta\in D}e^{-\Delta/T},
-  \label{eq:pmedia}
+  T=-\frac{\Delta}{\ln P}.
+  \label{eq:tinv}
 \end{equation}
-que cresce com $T$. Escolhe-se então a temperatura que leva $\bar P$ ao alvo desejado. O procedimento foi:
+Por exemplo, para que uma piora de 727 seja aceita com $P=0{,}8$, basta $T=-727/\ln 0{,}8\approx3\,258$.
+
+O procedimento tem cinco passos e está em \texttt{src/\allowbreak utils/\allowbreak temperatureCalibration.py}; o comando \texttt{python -m src.utils.\allowbreak temperatureCalibration <instância>} imprime a amostra e as duas temperaturas.
 
 \begin{enumerate}
-  \item para $T_0$, sortear 2\,000 pares $(\pi,\pi')$ por instância, com $\pi$ aleatória e $\pi'$ obtido por um \textit{swap} aleatório, e guardar os $\Delta>0$ (cerca de metade dos pares, entre 994 e 1\,025 valores);
-  \item escolher $T_0$, em número redondo, com $\bar P(T_0)\approx0{,}8$, para que no início a busca aceite cerca de quatro em cada cinco movimentos piores e se comporte quase como \textit{random walk};
-  \item para $T_f$, usar execuções-piloto: em torno da solução final de 5 execuções, sortear 1\,000 \textit{swaps} de cada uma (5\,000 movimentos) e escolher $T_f$ com $\bar P(T_f)$ entre 1\% e 2{,}5\%, para que o fim da execução se comporte quase como \textit{greedy descent};
-  \item conferir a escolha pelo gráfico da taxa de aceitação ao longo da execução (Figura~\ref{fig:aceitacao}).
+  \item \textbf{Amostrar pioras.} Sortear 2\,000 pares $(\pi,\pi')$ na instância, com $\pi$ aleatória e $\pi'$ obtido de $\pi$ por um \textit{swap} aleatório (gerador com semente 1\,000), e guardar os $\Delta>0$. Cerca de metade dos pares piora $h$, o que dá entre 970 e 1\,027 pioras por instância. A amostra usa permutações aleatórias porque é delas que o SA parte.
+  \item \textbf{Calcular $T_0$.} Aplicar a Eq.~\eqref{eq:tinv} à piora média $\bar\Delta$ da amostra, com $P=0{,}8$. No início, uma piora típica é aceita quatro vezes em cada cinco, e a busca se comporta quase como \textit{random walk}.
+  \item \textbf{Calcular $T_f$.} Aplicar a Eq.~\eqref{eq:tinv} a uma piora pequena, o 10º percentil $\Delta_{10\%}$ da amostra (90\% das pioras sorteadas são maiores que ela), com $P=0{,}01$. Se até essa piora pequena só passa uma vez em cem, as maiores quase nunca passam, e o fim da execução se comporta quase como \textit{greedy descent}.
+  \item \textbf{Arredondar} $T_0$ e $T_f$ para dois algarismos significativos e calcular $\alpha$ pela Eq.~\eqref{eq:alpha}.
+  \item \textbf{Conferir} no gráfico da taxa de aceitação (Figura~\ref{fig:aceitacao}) se a busca de fato começa perto de \textit{random walk} e termina perto de \textit{greedy descent}.
 \end{enumerate}
 
-A amostra de $T_f$ é tirada em torno das soluções finais porque ali os $\Delta$ têm outra escala: na instância grande, a mediana de $\Delta>0$ é 7\,688 em permutações aleatórias e 18\,564 em torno das soluções finais. A Tabela~\ref{tab:calib-sa} resume as amostras, e a Tabela~\ref{tab:par-sa} traz os valores adotados.
+A Tabela~\ref{tab:calib-sa} traz a amostra de cada instância, e a Tabela~\ref{tab:par-sa}, os valores resultantes. Na grande, por exemplo, $T_0=-11\,037/\ln 0{,}8\approx49\,000$ e $T_f=-1\,198/\ln 0{,}01\approx260$.
+
+\textbf{Por que $\Delta_{10\%}$ em $T_f$.} A versão mais simples usaria $\bar\Delta$ nas duas pontas. Ela não funciona porque a distribuição de $\Delta$ é assimétrica, com muitas pioras pequenas e poucas muito grandes: na grande, $\bar\Delta=11\,037$, mas $\Delta_{10\%}=1\,198$. Com $T_f$ calculado por $\bar\Delta$, que daria 2\,400 na grande, uma piora de 1\,198 ainda seria aceita com probabilidade $e^{-1198/2400}\approx0{,}61$. Num teste com as sementes do protocolo, essa versão terminou aceitando de 8\% a 10\% das pioras na última janela do orçamento, sem chegar à descida gulosa, e a média da grande ficou em 337\,039. Trocar $\bar\Delta$ por $\Delta_{10\%}$ no cálculo de $T_f$ resolve o problema com uma única mudança na fórmula.
+
+\textbf{O que é escolha deste trabalho.} Os alvos 0{,}8 e 0{,}01 traduzem em números o que se pede do SA: começar ``praticamente como \textit{random walk}'' e terminar ``praticamente como \textit{greedy descent}''. A taxa inicial de 0{,}8 também é a mais usada na literatura desde Kirkpatrick et al.~\cite{kirkpatrick1983}. Esses dois alvos e o 10º percentil são escolhas, e não valores que minimizam $h$; o gráfico de aceitação é o que confirma que funcionaram. O resfriamento geométrico também não garante o ótimo global, que exigiria resfriamento logarítmico, $T_k=c/\log k$~\cite{geman1984,hajek1988}, lento demais para os orçamentos deste trabalho.
 
 \begin{table}[H]
 \centering
-\caption{Amostras de calibração do SA ($\Delta>0$ de movimentos \textit{swap}) e aceitação média estimada pela Eq.~\eqref{eq:pmedia} nas temperaturas adotadas.}
+\caption{Amostra de calibração do SA: pioras ($\Delta>0$) em 2\,000 pares de permutação aleatória e \textit{swap} aleatório.}
 \label{tab:calib-sa}
 \small
-\begin{tabular}{lcccc}
+\begin{tabular}{lccc}
 \toprule
- & \multicolumn{2}{c}{$\pi$ aleatória} & \multicolumn{2}{c}{$\pi$ final (piloto)}\\
-Instância & $\bar\Delta$ & $\bar P(T_0)$ & mediana $\Delta$ & $\bar P(T_f)$\\
+Instância & Pioras & $\bar\Delta$ & $\Delta_{10\%}$\\
 \midrule
-pequena       & 788    & 0{,}79 & 1\,214  & 0{,}013\\
-intermediária & 4\,245  & 0{,}75 & 7\,322  & 0{,}016\\
-grande        & 10\,346 & 0{,}80 & 18\,564 & 0{,}025\\
+pequena       & 1\,007 & 727     & 82\\
+intermediária & 970    & 4\,008  & 414\\
+grande        & 1\,027 & 11\,037 & 1\,198\\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[H]
 \centering
-\caption{Parâmetros do \textit{simulated annealing} por instância ($m=1$).}
+\caption{Parâmetros do \textit{simulated annealing} por instância: $T_0=-\bar\Delta/\ln 0{,}8$ e $T_f=-\Delta_{10\%}/\ln 0{,}01$, arredondados, e $m=1$.}
 \label{tab:par-sa}
 \small
 \begin{tabular}{lcccc}
 \toprule
 Instância & $T_0$ & $T_f$ & $\alpha$ & Vizinhança\\
 \midrule
-pequena       & 3\,000  & 25  & 0{,}999904 & \textit{swap}\\
-intermediária & 13\,000 & 180 & 0{,}999971 & \textit{swap}\\
-grande        & 41\,000 & 650 & 0{,}999986 & \textit{swap}\\
+pequena       & 3\,300  & 18  & 0{,}999896 & \textit{swap}\\
+intermediária & 18\,000 & 90  & 0{,}999965 & \textit{swap}\\
+grande        & 49\,000 & 260 & 0{,}999983 & \textit{swap}\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Taxa de aceitação.} Registra-se, em janelas de avaliações, a fração de movimentos \textit{piores} aceitos. Uma têmpera bem calibrada começa quase como \textit{random walk} e termina quase como \textit{greedy descent}; um gráfico que permanece alto indica $T$ alta demais, e um que cai a zero logo no início indica $T$ baixa demais. No código, o histórico de cada execução guarda, por avaliação, a temperatura, o $h$ do sucessor, o $h$ corrente, o melhor $h$ e se o sucessor era pior e se foi aceito. A Figura~\ref{fig:aceitacao} divide o orçamento em 50 janelas e mostra a média das execuções. A taxa começa em 0{,}77, 0{,}73 e 0{,}77 e termina em 0{,}008, 0{,}020 e 0{,}025 nas instâncias pequena, intermediária e grande, perto dos alvos da calibração.
+\textbf{Taxa de aceitação.} Registra-se, em janelas de avaliações, a fração de movimentos \textit{piores} aceitos. Uma têmpera bem calibrada começa quase como \textit{random walk} e termina quase como \textit{greedy descent}; um gráfico que permanece alto indica $T$ alta demais, e um que cai a zero logo no início indica $T$ baixa demais. No código, o histórico de cada execução guarda, por avaliação, a temperatura, o $h$ do sucessor, o $h$ corrente, o melhor $h$ e se o sucessor era pior e se foi aceito. A Figura~\ref{fig:aceitacao} divide o orçamento em 50 janelas e mostra a média das execuções. A taxa começa em 0{,}79, 0{,}79 e 0{,}80 e termina em 0{,}006, 0{,}008 e 0{,}008 nas instâncias pequena, intermediária e grande, o que confirma a calibração.
 
 \subsection{(C) Algoritmo genético}\label{sec:ga}
 
