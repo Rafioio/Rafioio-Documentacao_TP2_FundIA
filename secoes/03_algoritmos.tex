@@ -141,11 +141,16 @@ O orçamento é dividido em 50 janelas iguais. Em cada janela, a taxa é o núme
 
 \subsection{(C) Algoritmo genético}\label{sec:ga}
 
-O GA mantém uma população de $N$ cromossomos e repete: seleção, cruzamento com probabilidade $P_c$, mutação com probabilidade $P_m$ e elitismo, até esgotar o orçamento de avaliações. A população inicial é uma amostra aleatória de $N$ permutações.
+O GA mantém uma população $P$ de $N$ cromossomos. A cada geração, sorteiam-se dois pais, aplica-se o cruzamento com probabilidade $P_c$, que gera dois filhos, e cada filho sofre mutação com probabilidade $P_m$. Repete-se esse passo até a nova população $P_{\text{nova}}$ ter $N$ filhos. Em seguida, os filhos são avaliados e os sobreviventes são escolhidos entre $P$ e $P_{\text{nova}}$. A população inicial é uma amostra aleatória de $N$ permutações.
 
 \textbf{Seleção e conversão custo$\to$aptidão.} Como $h$ é de minimização, o operador de seleção deve favorecer valores \textit{menores}. No torneio de tamanho $k$, basta escolher o indivíduo de menor $h$ entre $k$ sorteados, sem conversão. Na roleta, é necessária uma aptidão $f(\pi)\ge 0$ crescente com a qualidade, por exemplo $f(\pi)=h_{\max}-h(\pi)$ (com $h_{\max}$ o pior valor da geração) ou $f(\pi)=1/(1+h(\pi))$.
 
-\pend{operador de seleção adotado, tamanho do torneio ou fórmula de conversão custo$\to$aptidão efetivamente usada, e justificativa}
+O código usa a roleta, com a aptidão normalizada pelos valores extremos da população corrente:
+\begin{equation}
+  f(\pi)=\frac{h_{\max}-h(\pi)}{h_{\max}-h_{\min}},
+  \label{eq:aptidao}
+\end{equation}
+em que $h_{\max}$ e $h_{\min}$ são o pior e o melhor $h$ da geração. Assim, $f$ vale 1 no melhor indivíduo e 0 no pior. Para escolher um pai, sorteia-se um indivíduo com probabilidade uniforme e compara-se $f(\pi)$ com um número sorteado em $[0,1)$: se o número for menor, o indivíduo é aceito; caso contrário, o sorteio se repete até algum ser aceito. Esse procedimento é a roleta por aceitação estocástica \cite{lipowski2012}. Como $f$ é a aptidão $h_{\max}-h(\pi)$ dividida pelo seu valor máximo, $h_{\max}-h_{\min}$, a probabilidade de cada indivíduo ser escolhido é proporcional a $h_{\max}-h(\pi)$, a mesma da roleta clássica com essa conversão, sem precisar montar a roleta. A Eq.~\eqref{eq:aptidao} não muda se $h$ for multiplicado por uma constante positiva ou somado a uma constante, então a mesma seleção serve para as três instâncias, cujos valores de $h$ têm escalas diferentes. O pior indivíduo da geração tem $f=0$ e nunca é escolhido como pai. Quando toda a população tem o mesmo $h$, $f$ não é definida, e o código aceita o primeiro indivíduo sorteado.
 
 \textbf{Cruzamento.} Cruzamentos clássicos de um ou múltiplos pontos duplicariam ativos e gerariam cromossomos inválidos; é necessário um operador que preserve a permutação (OX, PMX ou cruzamento por arestas).
 
