@@ -52,11 +52,11 @@ A partir de uma permutação aleatória, o algoritmo move-se repetidamente para 
   \item \textbf{Sucessor aleatório com aceitação de melhora:} sorteia um único sucessor e o aceita somente se melhorar $h$.
 \end{itemize}
 
-\pend{variantes efetivamente implementadas (mínimo duas) e a variante adotada nos experimentos principais, com justificativa}
+Para o código entregue, foram implementadas ambas as variações de \textit{Best improvement} e \textit{First improvement}.
 
 Sob orçamento fixo, as variantes diferem fortemente em passos de melhoria por avaliação: o \textit{best improvement} paga uma vizinhança inteira por passo, enquanto o \textit{first improvement} e a variante aleatória pagam em média menos. A Seção~\ref{sec:res-t2} reporta quantos passos de melhoria cada variante deu dentro do orçamento. Para a variante aleatória, o critério de ótimo local não é determinístico; é preciso definir o critério de reinício.
 
-\pend{critério de detecção de ótimo local/reinício da variante aleatória, se implementada}
+Para detecção de um ótimo local, foi utilzada uma abordagem simples. Caso o algoritmo avance para um sucessor a partir de um determinado estado, o algoritmo identifica que não está em um ótimo local, pois houve melhoria na função objetivo. Entretanto, caso ele não melhore, uma nova solução aleatória é sorteada para que ele inicie o processo de \textit{greedy descent} novamente.
 
 \subsection{(B) \textit{Simulated annealing}}\label{sec:sa}
 

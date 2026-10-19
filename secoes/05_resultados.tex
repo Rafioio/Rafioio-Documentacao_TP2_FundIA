@@ -184,9 +184,28 @@ grande  & 5  & 160\,267{,}4 $\pm$ 5\,018{,}7 & 153\,192 & 166\,807\\
 \label{fig:conv-sa}
 \end{figure*}
 
-\textbf{Boxplots.} A Figura~\ref{fig:box} compara os três algoritmos em cada instância.
+\clearpage
 
 \begin{figure*}[!t]
+\centering
+\includegraphics[width=0.30\textwidth]{figuras/gd_small_5runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/gd_small_10runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/gd_small_15runs.pdf}\\[2pt]
+\includegraphics[width=0.30\textwidth]{figuras/gd_medium_5runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/gd_medium_10runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/gd_medium_15runs.pdf}\\[2pt]
+\includegraphics[width=0.30\textwidth]{figuras/gd_big_5runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/gd_big_10runs.pdf}\hfill
+\includegraphics[width=0.30\textwidth]{figuras/gd_big_15runs.pdf}
+\caption{Avaliação $\times$ melhor $h$ de cada execução do GD, gráficos gerados por \texttt{compareRuns}. Linhas: instâncias pequena (\texttt{small}), intermediária (\texttt{medium}) e grande (\texttt{big}). Colunas: sementes 0 a 4, 0 a 9 e 0 a 14. O eixo $y$ está em escala logarítmica, a linha preta é a mediana das execuções do gráfico, e o título traz a média $\pm$ desvio-padrão do $h$ final.}
+\label{fig:conv-gd}
+\end{figure*}
+
+\clearpage
+
+\textbf{Boxplots.} A Figura~\ref{fig:box} compara os três algoritmos em cada instância.
+
+\begin{figure*}[H]
 \centering
 \figpend{3.5cm}{boxplots do melhor $h$ por algoritmo, um painel por instância (arquivo fig\_boxplots.pdf)}
 \caption{Boxplots do melhor $h$ encontrado por execução, por instância e algoritmo.}
