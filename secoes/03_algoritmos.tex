@@ -129,7 +129,15 @@ grande        & 49\,000 & 260 & 0{,}999983 & \textit{swap}\\
 \end{tabular}
 \end{table}
 
-\textbf{Taxa de aceitação.} Registra-se, em janelas de avaliações, a fração de movimentos \textit{piores} aceitos. Uma têmpera bem calibrada começa quase como \textit{random walk} e termina quase como \textit{greedy descent}; um gráfico que permanece alto indica $T$ alta demais, e um que cai a zero logo no início indica $T$ baixa demais. No código, o histórico de cada execução guarda, por avaliação, a temperatura, o $h$ do sucessor, o $h$ corrente, o melhor $h$ e se o sucessor era pior e se foi aceito. A Figura~\ref{fig:aceitacao} divide o orçamento em 50 janelas e mostra a média das execuções. A taxa começa em 0{,}79, 0{,}79 e 0{,}80 e termina em 0{,}006, 0{,}008 e 0{,}008 nas instâncias pequena, intermediária e grande, o que confirma a calibração.
+\textbf{Taxa de aceitação.} Registra-se, em janelas de avaliações, a fração de movimentos \textit{piores} aceitos. Uma têmpera bem calibrada começa quase como \textit{random walk} e termina quase como \textit{greedy descent}; um gráfico que permanece alto indica $T$ alta demais, e um que cai a zero logo no início indica $T$ baixa demais. A Figura~\ref{fig:aceitacao} é gerada por \texttt{src/\allowbreak utils/\allowbreak acceptanceRate.py}, com o comando \texttt{python -m src.utils.\allowbreak acceptanceRate}, a partir dos \texttt{.csv} gravados pelas execuções, os mesmos usados nas tabelas de resultados. Cada linha do \texttt{.csv} guarda só a permutação corrente após uma avaliação, então o gráfico reconstrói a aceitação comparando cada linha com a anterior:
+
+\begin{itemize}
+  \item permutação igual à anterior: o sucessor foi rejeitado, o que no SA só acontece com pioras;
+  \item permutação diferente e $h$ maior que o anterior: uma piora foi aceita;
+  \item permutação diferente e $h$ menor ou igual: o sucessor não era pior e não entra na conta.
+\end{itemize}
+
+O orçamento é dividido em 50 janelas iguais. Em cada janela, a taxa é o número de pioras aceitas dividido pelo número de pioras, aceitas e rejeitadas. A curva de cada instância é a média dessas taxas nas execuções do protocolo (30, 30 e 10). Durante a execução, o \texttt{Solver} também registra em memória, por avaliação, se o sucessor era pior e se foi aceito; a reconstrução pelos \texttt{.csv} coincide com esses registros, com diferença abaixo de $10^{-4}$ em todas as janelas. A taxa começa em 0{,}79, 0{,}79 e 0{,}80 e termina em 0{,}006, 0{,}008 e 0{,}008 nas instâncias pequena, intermediária e grande, o que confirma a calibração.
 
 \subsection{(C) Algoritmo genético}\label{sec:ga}
 
